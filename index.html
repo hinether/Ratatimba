@@ -82,9 +82,9 @@
             color: #fff;
         }
 
-        .minitext {
+        input.minitext {
             width: 40px;
-            font-size: 0.8rem;
+            font-size: 0.6rem;
             margin-top: 0.2rem;
             background: #222;
             color: #aaa;
@@ -191,6 +191,7 @@
                 playerMoney = parseInt(playerMoney);
                 totalCost = parseInt(totalCost);
                 document.querySelector('#' + player + ' .playerMoney input').value = playerMoney - totalCost;
+                document.querySelector('#' + player + ' .' + suit + ' input.minitext').value = parseInt(document.querySelector('#' + player + ' .' + suit + ' input.minitext').value) + parseInt(amounts[suit]);
             }
         }
 
@@ -202,6 +203,7 @@
                 playerMoney = parseInt(playerMoney);
                 totalCost = parseInt(totalCost);
                 document.querySelector('#' + player + ' .playerMoney input').value = playerMoney + totalCost;
+                document.querySelector('#' + player + ' .' + suit + ' input.minitext').value = parseInt(document.querySelector('#' + player + ' .' + suit + ' input.minitext').value) - parseInt(amounts[suit]);
             }
         }
  function addPlayer() {
@@ -214,27 +216,26 @@
                 <div class="input-group playerMoney">
                     <label>💸</label>
                     <input type="number" value="1000">
-                    <input disabled type="number" id="player${playerCount}Total" value="1000" class="minitext">
                 </div>
                 <div class="input-group Spades">
                     <label>♠️</label>
                     <input type="number" value="0">
-                    <input disabled type="number" id="player${playerCount}Spades" value="0" class="minitext">
+                    <input disabled type="number" id="player${playerCount}Spades" value="0" class="minitext suit">
                 </div>
                 <div class="input-group Hearts">
                     <label>♥️</label>
                     <input type="number" value="0">
-                    <input disabled type="number" id="player${playerCount}Hearts" value="0" class="minitext">
+                    <input disabled type="number" id="player${playerCount}Hearts" value="0" class="minitext suit">
                 </div>
                 <div class="input-group Diamonds">
                     <label>♦️</label>
                     <input type="number" value="0">
-                    <input disabled type="number" id="player${playerCount}Diamonds" value="0" class="minitext">
+                    <input disabled type="number" id="player${playerCount}Diamonds" value="0" class="minitext suit">
                 </div>
                 <div class="input-group Clubs">
                     <label>♣️</label>
                     <input type="number" value="0">
-                    <input disabled type="number" id="player${playerCount}Clubs" value="0" class="minitext">
+                    <input disabled type="number" id="player${playerCount}Clubs" value="0" class="minitext suit">
                 </div>
                 <button id="Buy" >Buy</button>
                 <button id="Sell">Sell</button>
@@ -253,6 +254,10 @@
                     "Clubs": Clubs
                 };
                 Buy(amounts,PlayerID);
+                this.parentElement.querySelector('.Spades input').value = 0;
+                this.parentElement.querySelector('.Hearts input').value = 0;
+                this.parentElement.querySelector('.Diamonds input').value = 0;
+                this.parentElement.querySelector('.Clubs input').value = 0;
             })
             newPlayerRow.querySelector('#Sell').addEventListener('click', function() {
                 let PlayerID = this.parentElement.id;
@@ -267,6 +272,10 @@
                     "Clubs": Clubs
                 };
                Sell(amounts,PlayerID); 
+                this.parentElement.querySelector('.Spades input').value = 0;
+                this.parentElement.querySelector('.Hearts input').value = 0;
+                this.parentElement.querySelector('.Diamonds input').value = 0;
+                this.parentElement.querySelector('.Clubs input').value = 0;
             });
         }
         document.getElementById('addPlayer').addEventListener('click', addPlayer);
