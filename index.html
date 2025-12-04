@@ -125,6 +125,30 @@
 <body>
     <div class="row">
         <div style="display: flex; flex-direction: column; align-items: center; margin-right: 1rem;">
+            <div class="input-group" style="flex-direction: row;">
+                <label style="margin-right: 5px; width: 44px; justify-content: center;">♠️</label>
+                <input type="text" class="CardSlot" id="CardsSpades" style="width: 50dvw;">
+                <Button class="RefreshPrice" id="Spades">🔄(<span class="NewPrice">100</span>)</Button>
+            </div>
+            <div class="input-group" style="flex-direction: row;">
+                <label style="margin-right: 5px; width: 44px; justify-content: center;">♥️</label>
+                <input type="text" class="CardSlot" id="CardsHearts" style="width: 50dvw;">
+                <Button class="RefreshPrice" id="Hearts">🔄(<span class="NewPrice">100</span>)</Button>
+            </div>
+            <div class="input-group" style="flex-direction: row;">
+                <label style="margin-right: 5px; width: 44px; justify-content: center;">♦️</label>
+                <input type="text" class="CardSlot" id="CardsDiamonds" style="width: 50dvw;">
+                <Button class="RefreshPrice" id="Clubs">🔄(<span class="NewPrice">100</span>)</Button>
+            </div>
+            <div class="input-group" style="flex-direction: row;">
+                <label style="margin-right: 5px; width: 44px; justify-content: center;">♣️</label>
+                <input type="text" class="CardSlot" id="CardsClubs" style="width: 50dvw;">
+                <Button class="RefreshPrice" id="Diamonds">🔄(<span class="NewPrice">100</span>)</Button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div style="display: flex; flex-direction: column; align-items: center; margin-right: 1rem;">
             <button onclick="BuyAll()" id="BuyAll" style="margin-bottom: 3px;">Buy All</button>
             <button onclick="SellAll()" id="SellAll">Sell All</button>
         </div>
@@ -146,7 +170,6 @@
         </div>
         <button id="addPlayer">Add player</button>
     <script>
-
         function BuyAll(){
             const players = document.querySelectorAll('.player-row');
             players.forEach(player => {
@@ -162,6 +185,10 @@
                     "Clubs": Clubs
                 };
                 Buy(amounts,PlayerID);
+                player.querySelector('.Spades input').value = 0;
+                player.querySelector('.Hearts input').value = 0;
+                player.querySelector('.Diamonds input').value = 0;
+                player.querySelector('.Clubs input').value = 0;
             });
         }
 
@@ -180,6 +207,10 @@
                     "Clubs": Clubs
                 };
                 Sell(amounts,PlayerID);
+                player.querySelector('.Spades input').value = 0;
+                player.querySelector('.Hearts input').value = 0;
+                player.querySelector('.Diamonds input').value = 0;
+                player.querySelector('.Clubs input').value = 0;
             });
         }
 
@@ -279,11 +310,230 @@
             });
         }
         document.getElementById('addPlayer').addEventListener('click', addPlayer);
+        document.querySelectorAll('.RefreshPrice').forEach(button => {
+            button.addEventListener('click', function() {
+                let suit = this.id;
+                let NewPrice = this.querySelector('.NewPrice');
+                let ToChange = "Price" + suit;
+                if(NewPrice.textContent != "X"){
+                    document.querySelector('#' + ToChange).value = NewPrice.textContent;
+                }
+            });
+        });
+        document.querySelectorAll('.CardSlot').forEach(input => {
+            input.addEventListener('change', function() {
+                let suit = this.id.replace('Cards','');
+                let cards = this.value;
+                CalculatePrice(suit,cards);
+            });
+        });
         window.onload = function() {
             for(let i = 0; i < 4; i++){
                 addPlayer();
             }
         };
+
+
+        let CardValues = {
+            "X": 0,
+            "K": 10,
+            "Q": 10,
+            "J": 15,
+            "T": 10,
+            "9": 9,
+            "8": 8,
+            "7": 7,
+            "6": 6,
+            "5": 5,
+            "4": 4,
+            "3": 3,
+            "2": 2,
+            "A": 1
+        };
+
+        let JokersSeen = {
+            0: 0,
+            1: 20,
+            2: -40,
+            3: 60
+        }
+
+        function CalculateKing(Kingsuit,letter,cardArray){
+            priceChange = 0
+            let mult
+            if(Kingsuit == letter){
+                mult = 1
+            }else{
+                mult = -1
+            }
+            for(i=0;i<cardArray.length;i++){
+                let card = cardArray[i]
+                let suitChar = card[0].toUpperCase()
+                if(suitChar != Kingsuit){
+                    continue
+                }else{
+                    let value = card[1].toUpperCase()
+                    if(value == "K"){
+                        continue
+                    }else{
+                        let currentCardChange = CardValues[value]
+                        if(value == "Q" && ((i == 0) || (i == cardArray.length - 1))){
+                            currentCardChange += 5
+                        }
+                        if(currentCardChange < 3){
+                            if(mult == 1){
+                                currentCardChange += 10
+                            }
+                        }
+                        priceChange += currentCardChange * mult
+                    }
+                }
+            }
+            return priceChange
+        }
+
+        function CalculatePrice(suit,cards){
+            let basePrice = document.getElementById('Price' + suit).value;
+            let cardArray = cards.split(',').map(card => card.trim()).filter(card => card !== "");
+            let letter = suit[0]
+            let changePrice = 0;
+            console.log(cardArray, letter);
+            if(cardArray == []){
+                document.getElementById(suit).querySelector('.NewPrice').textContent = basePrice;
+            }else{
+                let LastSeen = ""
+                let Combo = {
+                    "positive": 0,
+                    "negative": 0
+                }
+                let err = false
+                let jokerCount = 0
+                let KingsSeen = {
+                    "S": false,
+                    "H": false,
+                    "D": false,
+                    "C": false
+                }
+                for(let i = 0; i < cardArray.length; i++){
+                    let card = cardArray[i]
+                    let value = card[1]
+                    let suitChar = card[0]
+                    let mult = 1
+                    if(!(value && suitChar)){
+                        err = true
+                        break
+                    }
+                    value = value.toUpperCase()
+                    suitChar = suitChar.toUpperCase()
+                    if((!CardValues[value]) && (value != "X")){
+                        err = true
+                        break
+                    }
+                    if((suitChar == letter) || (suitChar == "X")){
+                        Combo["positive"] += 1
+                        Combo["negative"] = 0
+                        mult = 1
+                        if(Combo["positive"] >= 4){
+                            mult = 2
+                            if(Combo["positive"] == 4){
+                                changePrice += 20
+                            }
+                            if(Combo["positive"] >= 6){
+                                if(Combo["positive"] == 6){
+                                    changePrice -= 50
+                                }
+                                mult = -2
+                            }
+                        }
+                    }else{
+                        Combo["positive"] = 0
+                        if(suitChar == LastSeen){
+                            Combo["negative"] += 1
+                        }else{
+                            Combo["negative"] = 1
+                        }
+                        mult = -1
+                        if(Combo["negative"] >= 3){
+                            if(Combo["negative"] == 3){
+                                changePrice -= 20
+                            }
+                            mult = -2
+                            if(Combo["negative"] >= 5){
+                                if(Combo["negative"] == 5){
+                                    changePrice += 50
+                                }
+                                mult = 3
+                            }
+                        }
+                    }
+                    if(suitChar != "X"){
+                        LastSeen = suitChar
+                    }
+                    if(value == "X"){
+                        jokerCount += 1
+                    }
+                    if(value == "K"){
+                        KingsSeen[suitChar] = true
+                    }
+                    let currentCardChange = CardValues[value]
+                    if(value == "Q" && ((i == 0) || (i == cardArray.length - 1))){
+                        currentCardChange += 5
+                    }
+                    if(value == "Q"){
+                        if(i != 0){
+                            let prevCard = cardArray[i - 1]
+                            let prevSuitChar = prevCard[0].toUpperCase()
+                            let prevCardValue = prevCard[1].toUpperCase()
+                            let prevCardChange = CardValues[prevCardValue]
+                            if((prevCardChange < 3) && (prevSuitChar == letter)){
+                                    prevCardChange += 10
+                                }
+                            if(prevSuitChar == suitChar){
+                                currentCardChange += prevCardChange 
+                            }else{
+                                currentCardChange -= prevCardChange
+                            }
+                        }
+                        if(i != cardArray.length - 1){
+                            let nextCard = cardArray[i + 1]
+                            let nextSuitChar = nextCard[0].toUpperCase()
+                            let nextCardValue = nextCard[1].toUpperCase()
+                            let nextCardChange = CardValues[nextCardValue]
+                            if((nextCardChange < 3) && (nextSuitChar == letter)){
+                                    nextCardChange += 10
+                                }
+                            if(nextSuitChar == suitChar){
+                                currentCardChange += nextCardChange 
+                            }else{
+                                currentCardChange -= nextCardChange
+                            }
+                        }
+                    }
+                    if(currentCardChange < 3){
+                        if(suitChar == letter){
+                            currentCardChange += 10
+                        }
+                    }
+                    changePrice += currentCardChange * mult
+                }
+                changePrice += JokersSeen[jokerCount]
+                for(const k in KingsSeen){
+                    if(KingsSeen[k]){
+                        let currentKingChange = CalculateKing(k,letter,cardArray)
+                        changePrice += currentKingChange
+                    }
+                }
+                if(err){
+                    document.getElementById(suit).querySelector('.NewPrice').textContent = "X";
+                }else{
+                    let finalPrice = parseInt(basePrice) + parseInt(changePrice);
+                    if(finalPrice < 0){
+                        finalPrice = 0
+                    }
+                    document.getElementById(suit).querySelector('.NewPrice').textContent = finalPrice;
+                }
+            }
+        }
     </script>
 </body>
 </html>
