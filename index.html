@@ -491,7 +491,15 @@
                             if(prevSuitChar == suitChar){
                                 currentCardChange += prevCardChange 
                             }else{
-                                currentCardChange -= prevCardChange
+                                if(prevSuitChar == letter){
+                                    currentCardChange -= prevCardChange
+                                }else{
+                                    if(suitChar == letter){
+                                        currentCardChange -= prevCardChange
+                                    }else{
+                                    currentCardChange += prevCardChange
+                                    }
+                                }
                             }
                         }
                         if(i != cardArray.length - 1){
@@ -505,7 +513,15 @@
                             if(nextSuitChar == suitChar){
                                 currentCardChange += nextCardChange 
                             }else{
-                                currentCardChange -= nextCardChange
+                                if(nextSuitChar == letter){
+                                    currentCardChange -= nextCardChange
+                                }else{
+                                    if(suitChar == letter){
+                                        currentCardChange -= nextCardChange
+                                    }else{
+                                    currentCardChange += nextCardChange
+                                    }
+                                }
                             }
                         }
                     }
