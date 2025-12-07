@@ -138,12 +138,12 @@
             <div class="input-group" style="flex-direction: row;">
                 <label style="margin-right: 5px; width: 44px; justify-content: center;">♦️</label>
                 <input type="text" class="CardSlot" id="CardsDiamonds" style="width: 50dvw;">
-                <Button class="RefreshPrice" id="Clubs">🔄(<span class="NewPrice">100</span>)</Button>
+                <Button class="RefreshPrice" id="Diamonds">🔄(<span class="NewPrice">100</span>)</Button>
             </div>
             <div class="input-group" style="flex-direction: row;">
                 <label style="margin-right: 5px; width: 44px; justify-content: center;">♣️</label>
                 <input type="text" class="CardSlot" id="CardsClubs" style="width: 50dvw;">
-                <Button class="RefreshPrice" id="Diamonds">🔄(<span class="NewPrice">100</span>)</Button>
+                <Button class="RefreshPrice" id="Clubs">🔄(<span class="NewPrice">100</span>)</Button>
             </div>
         </div>
     </div>
@@ -355,7 +355,11 @@
             0: 0,
             1: 20,
             2: -40,
-            3: 60
+            3: 60,
+            4: -80,
+            5: 100,
+            6: -120,
+            7: 140
         }
 
         function CalculateKing(Kingsuit,letter,cardArray){
@@ -417,6 +421,7 @@
                 for(let i = 0; i < cardArray.length; i++){
                     let card = cardArray[i]
                     let value = card[1]
+                    let ExtraMults = card.slice(2).length
                     let suitChar = card[0]
                     let mult = 1
                     if(!(value && suitChar)){
@@ -528,6 +533,13 @@
                     if(currentCardChange < 3){
                         if(suitChar == letter){
                             currentCardChange += 10
+                        }
+                    }
+                    if(ExtraMults > 0){
+                        if(mult > 0){
+                            mult += ExtraMults
+                        }else{
+                            mult -= ExtraMults
                         }
                     }
                     changePrice += currentCardChange * mult
